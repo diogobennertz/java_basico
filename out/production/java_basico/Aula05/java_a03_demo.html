@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo ao Vivo — Laços de Repetição · Aula 03</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1e1b4b;--surface:#2e2a6e;--surface2:#3730a3;--border:#4338ca;
+  --accent:#818cf8;--accent2:#34d399;--accent3:#fb923c;--accent4:#f472b6;--accent5:#38bdf8;
+  --text:#e0e7ff;--muted:#a5b4fc;--java:#f89820;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.topbar{background:rgba(30,27,75,.95);border-bottom:1px solid var(--border);padding:12px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.java-badge{background:var(--java);color:#000;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;letter-spacing:1px}
+.lesson-info{font-size:13px;color:var(--muted)}.lesson-info span{color:var(--text);font-weight:600}
+.nav-dots{display:flex;gap:5px}
+.nd{width:22px;height:4px;border-radius:2px;background:rgba(255,255,255,.15)}
+.nd.done{background:var(--accent2)}.nd.active{background:var(--accent)}
+
+.hero{padding:52px 40px 32px;max-width:880px;margin:0 auto;animation:fu .5s ease}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.demo-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(129,140,248,.15);border:1px solid var(--accent);border-radius:6px;padding:5px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);margin-bottom:20px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:36px;font-weight:800;line-height:1.1;margin-bottom:12px;color:var(--text)}
+.hero-sub{font-size:14px;color:var(--muted);line-height:1.7;max-width:560px}
+
+.content{max-width:880px;margin:0 auto;padding:0 40px 90px}
+
+/* DEMO SEQUENCE CARDS */
+.demo-seq{display:flex;flex-direction:column;gap:16px;margin-bottom:44px}
+.demo-step{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.demo-step.active-step{border-color:var(--accent);box-shadow:0 0 0 3px rgba(129,140,248,.1)}
+.demo-step.done-step{border-color:var(--accent2)}
+.ds-head{display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:pointer;user-select:none}
+.ds-head:hover{background:rgba(255,255,255,.03)}
+.ds-num{width:28px;height:28px;border-radius:50%;background:rgba(129,140,248,.15);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0}
+.demo-step.done-step .ds-num{background:var(--accent2);border-color:var(--accent2);color:#000}
+.ds-info{flex:1}
+.ds-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.ds-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.ds-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px}
+.badge-for{background:rgba(129,140,248,.2);color:var(--accent)}
+.badge-while{background:rgba(52,211,153,.2);color:var(--accent2)}
+.badge-do{background:rgba(251,146,60,.2);color:var(--accent3)}
+.badge-nest{background:rgba(244,114,182,.2);color:var(--accent4)}
+.badge-ctrl{background:rgba(56,189,248,.2);color:var(--accent5)}
+.ds-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.demo-step.active-step .ds-body,.demo-step.done-step .ds-body{max-height:2000px}
+.ds-bi{padding:0 18px 18px;border-top:1px solid rgba(255,255,255,.06)}
+
+.step-desc{font-size:13px;color:var(--muted);line-height:1.75;margin:12px 0 8px;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid var(--accent)}
+
+.cb{background:#0f0c29;border-radius:8px;padding:0;overflow:hidden;margin:10px 0;border:1px solid rgba(255,255,255,.08)}
+.cb-head{background:rgba(255,255,255,.06);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06)}
+.cb-lang{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--java);font-weight:600;letter-spacing:1px}
+.cp-btn{background:none;border:1px solid rgba(255,255,255,.15);color:var(--muted);font-size:11px;padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'Sora',sans-serif;transition:all .2s}
+.cp-btn:hover{border-color:var(--accent);color:var(--accent)}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.8;color:#94a3b8}
+.kw{color:#f472b6}.tp{color:#38bdf8}.str{color:#86efac}.cm{color:#475569;font-style:italic}
+.num{color:#fbbf24}.vr{color:#e2e8f0}.fn{color:#c084fc}.cl{color:#c4b5fd}.an{color:#fb923c}
+
+.terminal{background:#050217;border-radius:8px;padding:0;overflow:hidden;margin:10px 0;border:1px solid rgba(255,255,255,.1)}
+.term-bar{background:rgba(255,255,255,.06);padding:8px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(255,255,255,.06)}
+.td{width:11px;height:11px;border-radius:50%}
+.tr2{background:#ff5f57}.ty{background:#ffbd2e}.tg{background:#28c840}
+.term-title{flex:1;text-align:center;font-size:11px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace}
+.term-body{padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:#86efac;min-height:50px}
+.term-label{color:rgba(255,255,255,.3);font-size:10px;margin-bottom:4px}
+
+.ds-actions{display:flex;gap:8px;margin-top:14px}
+.ds-btn{font-size:12px;padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'Sora',sans-serif;font-weight:600;transition:all .15s}
+.btn-done{background:var(--accent2);color:#000}
+.btn-done:hover{opacity:.85}
+.btn-next{background:var(--accent);color:#000}
+.btn-next:hover{opacity:.85}
+
+.tip-box{background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.25);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}
+.tip-box strong{color:var(--accent3)}
+
+.nav-footer{max-width:880px;margin:0 auto;padding:0 40px 60px;display:flex;justify-content:space-between;align-items:center}
+.nav-btn{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);padding:11px 22px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;transition:all .2s}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.nav-btn.next{background:var(--accent);border-color:var(--accent);color:#000}
+.nav-btn.next:hover{background:#a5b4fc}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="java-badge">JAVA</span>
+    <span class="lesson-info">Aula 03 — <span>Demo ao Vivo</span></span>
+  </div>
+  <div class="nav-dots">
+    <div class="nd done"></div>
+    <div class="nd active"></div>
+    <div class="nd"></div>
+    <div class="nd"></div>
+    <div class="nd"></div>
+  </div>
+</header>
+
+<main>
+<div class="hero">
+  <div class="demo-tag"><span class="live-dot"></span>Demo ao Vivo — Digite junto com o professor</div>
+  <h1>Laços de Repetição<br>na Prática</h1>
+  <p class="hero-sub">5 demos progressivas — do for básico ao laço aninhado. Abra seu IDE e acompanhe cada passo. Marque como concluído ao terminar de digitar e testar.</p>
+</div>
+
+<div class="content">
+<div class="demo-seq" id="demos"></div>
+</div>
+</main>
+
+<nav class="nav-footer">
+  <a href="java_a03_exposicao.html" class="nav-btn">← Exposição</a>
+  <a href="java_a03_pratica_guiada.html" class="nav-btn next">Prática Guiada →</a>
+</nav>
+
+<script>
+const DEMOS = [
+  {
+    title: 'for — contando e somando',
+    sub: '~10 min · Crie ContadorFor.java',
+    badge: 'badge-for',
+    badgeLabel: 'for',
+    desc: 'Primeiro contato com o for. Crie um arquivo, conte de 1 a N e calcule a soma acumulada. O professor vai digitar ao vivo — copie exatamente.',
+    code: `<span class="kw">public class</span> <span class="cl">ContadorFor</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {
+
+        <span class="tp">int</span> <span class="vr">n</span> = <span class="num">10</span>;
+        <span class="tp">int</span> <span class="vr">soma</span> = <span class="num">0</span>;
+
+        <span class="kw">for</span> (<span class="tp">int</span> <span class="vr">i</span> = <span class="num">1</span>; <span class="vr">i</span> &lt;= <span class="vr">n</span>; <span class="vr">i</span>++) {
+            <span class="vr">soma</span> += <span class="vr">i</span>;
+            System.out.<span class="fn">printf</span>(<span class="str">"i=%2d | soma=%3d%n"</span>, <span class="vr">i</span>, <span class="vr">soma</span>);
+        }
+
+        System.out.<span class="fn">printf</span>(<span class="str">"%nSoma de 1 a %d = %d%n"</span>, <span class="vr">n</span>, <span class="vr">soma</span>);
+    }
+}`,
+    output: `i= 1 | soma=  1
+i= 2 | soma=  3
+i= 3 | soma=  6
+...
+i=10 | soma= 55
+
+Soma de 1 a 10 = 55`,
+    tip: '<strong>Experimente:</strong> troque n=10 por n=100 e execute — a soma deve dar 5050. Isso é a fórmula de Gauss: n*(n+1)/2.'
+  },
+  {
+    title: 'while — leitura com sentinela',
+    sub: '~10 min · Crie MediaWhile.java',
+    badge: 'badge-while',
+    badgeLabel: 'while',
+    desc: 'O while é perfeito para "leia até o usuário querer parar". O valor especial que encerra a leitura se chama sentinela.',
+    code: `<span class="an">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cl">MediaWhile</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {
+        <span class="cl">Scanner</span> sc = <span class="kw">new</span> <span class="cl">Scanner</span>(System.in);
+        <span class="tp">double</span> <span class="vr">soma</span> = <span class="num">0</span>;
+        <span class="tp">int</span>    <span class="vr">qtd</span>  = <span class="num">0</span>;
+
+        System.out.<span class="fn">print</span>(<span class="str">"Nota (ou -1 para encerrar): "</span>);
+        <span class="tp">double</span> <span class="vr">nota</span> = sc.nextDouble();
+
+        <span class="kw">while</span> (<span class="vr">nota</span> != -<span class="num">1</span>) {
+            <span class="vr">soma</span> += <span class="vr">nota</span>;
+            <span class="vr">qtd</span>++;
+            System.out.<span class="fn">print</span>(<span class="str">"Próxima nota (-1 p/ sair): "</span>);
+            <span class="vr">nota</span> = sc.nextDouble();
+        }
+
+        <span class="kw">if</span> (<span class="vr">qtd</span> == <span class="num">0</span>) {
+            System.out.<span class="fn">println</span>(<span class="str">"Nenhuma nota informada."</span>);
+        } <span class="kw">else</span> {
+            System.out.<span class="fn">printf</span>(<span class="str">"Notas: %d | Média: %.2f%n"</span>, <span class="vr">qtd</span>, <span class="vr">soma</span>/<span class="vr">qtd</span>);
+        }
+        sc.close();
+    }
+}`,
+    output: `Nota (ou -1 para encerrar): 8.5
+Próxima nota (-1 p/ sair): 7.0
+Próxima nota (-1 p/ sair): 9.5
+Próxima nota (-1 p/ sair): -1
+Notas: 3 | Média: 8.33`,
+    tip: '<strong>Padrão lê-antes-verifica:</strong> lemos a primeira entrada ANTES do while para que a condição possa ser avaliada. Dentro do laço, lemos novamente no final. Este padrão é chamado de "primed loop".'
+  },
+  {
+    title: 'do-while — menu persistente',
+    sub: '~10 min · Crie MenuDoWhile.java',
+    badge: 'badge-do',
+    badgeLabel: 'do-while',
+    desc: 'O do-while garante que o menu apareça ao menos uma vez. Sem ele, o usuário poderia nunca ver as opções se a condição fosse falsa de início.',
+    code: `<span class="an">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cl">MenuDoWhile</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {
+        <span class="cl">Scanner</span> sc = <span class="kw">new</span> <span class="cl">Scanner</span>(System.in);
+        <span class="tp">int</span> <span class="vr">opcao</span>;
+        <span class="tp">int</span> <span class="vr">rodadas</span> = <span class="num">0</span>;
+
+        <span class="kw">do</span> {
+            <span class="vr">rodadas</span>++;
+            System.out.<span class="fn">println</span>(<span class="str">"\n═══ MENU ══════════"</span>);
+            System.out.<span class="fn">println</span>(<span class="str">"1. Calcular quadrado"</span>);
+            System.out.<span class="fn">println</span>(<span class="str">"2. Calcular cubo"</span>);
+            System.out.<span class="fn">println</span>(<span class="str">"0. Sair"</span>);
+            System.out.<span class="fn">print</span>(<span class="str">"Opção: "</span>);
+            <span class="vr">opcao</span> = sc.nextInt();
+
+            <span class="kw">if</span> (<span class="vr">opcao</span> == <span class="num">1</span>) {
+                System.out.<span class="fn">print</span>(<span class="str">"Número: "</span>);
+                <span class="tp">double</span> <span class="vr">x</span> = sc.nextDouble();
+                System.out.<span class="fn">printf</span>(<span class="str">"%.1f² = %.1f%n"</span>, <span class="vr">x</span>, <span class="vr">x</span>*<span class="vr">x</span>);
+            } <span class="kw">else if</span> (<span class="vr">opcao</span> == <span class="num">2</span>) {
+                System.out.<span class="fn">print</span>(<span class="str">"Número: "</span>);
+                <span class="tp">double</span> <span class="vr">x</span> = sc.nextDouble();
+                System.out.<span class="fn">printf</span>(<span class="str">"%.1f³ = %.1f%n"</span>, <span class="vr">x</span>, <span class="vr">x</span>*<span class="vr">x</span>*<span class="vr">x</span>);
+            } <span class="kw">else if</span> (<span class="vr">opcao</span> != <span class="num">0</span>) {
+                System.out.<span class="fn">println</span>(<span class="str">"Opção inválida!"</span>);
+            }
+
+        } <span class="kw">while</span> (<span class="vr">opcao</span> != <span class="num">0</span>);
+
+        System.out.<span class="fn">printf</span>(<span class="str">"Saindo após %d rodada(s). Até logo!%n"</span>, <span class="vr">rodadas</span>-<span class="num">1</span>);
+        sc.close();
+    }
+}`,
+    output: `═══ MENU ══════════
+1. Calcular quadrado
+2. Calcular cubo
+0. Sair
+Opção: 1
+Número: 4
+4.0² = 16.0
+...
+Saindo após 3 rodada(s). Até logo!`,
+    tip: '<strong>rodadas - 1:</strong> subtraímos 1 porque a última "rodada" foi a escolha de sair (opção 0), que não conta como uso real do menu. Pequenos ajustes assim deixam o feedback ao usuário mais preciso.'
+  },
+  {
+    title: 'break e continue — filtrando dados',
+    sub: '~8 min · Crie FiltroNotas.java',
+    badge: 'badge-ctrl',
+    badgeLabel: 'break/continue',
+    desc: 'break sai imediatamente do laço. continue pula para a próxima iteração sem executar o restante do corpo. Use com parcimônia.',
+    code: `<span class="kw">public class</span> <span class="cl">FiltroNotas</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {
+
+        <span class="tp">double</span>[] <span class="vr">notas</span> = {<span class="num">7.5</span>, <span class="num">-1</span>, <span class="num">9.0</span>, <span class="num">4.5</span>, <span class="num">8.5</span>, <span class="num">10.0</span>};
+        <span class="tp">double</span> <span class="vr">somaAprovados</span> = <span class="num">0</span>;
+        <span class="tp">int</span>    <span class="vr">qtdAprovados</span>  = <span class="num">0</span>;
+
+        <span class="kw">for</span> (<span class="tp">int</span> <span class="vr">i</span> = <span class="num">0</span>; <span class="vr">i</span> &lt; <span class="vr">notas</span>.length; <span class="vr">i</span>++) {
+
+            <span class="kw">if</span> (<span class="vr">notas</span>[<span class="vr">i</span>] &lt; <span class="num">0</span>) {
+                System.out.<span class="fn">println</span>(<span class="str">"Nota inválida! Encerrando leitura."</span>);
+                <span class="kw">break</span>;  <span class="cm">// encerra o laço</span>
+            }
+
+            <span class="kw">if</span> (<span class="vr">notas</span>[<span class="vr">i</span>] &lt; <span class="num">5.0</span>) {
+                System.out.<span class="fn">printf</span>(<span class="str">"Nota %.1f ignorada (reprovado)%n"</span>, <span class="vr">notas</span>[<span class="vr">i</span>]);
+                <span class="kw">continue</span>;  <span class="cm">// pula para o próximo</span>
+            }
+
+            <span class="vr">somaAprovados</span> += <span class="vr">notas</span>[<span class="vr">i</span>];
+            <span class="vr">qtdAprovados</span>++;
+        }
+
+        System.out.<span class="fn">printf</span>(<span class="str">"Aprovados: %d | Média: %.2f%n"</span>,
+            <span class="vr">qtdAprovados</span>, <span class="vr">qtdAprovados</span> > <span class="num">0</span> ? <span class="vr">somaAprovados</span>/<span class="vr">qtdAprovados</span> : <span class="num">0</span>);
+    }
+}`,
+    output: `Nota inválida! Encerrando leitura.
+Nota 4.5 ignorada (reprovado)
+Aprovados: 2 | Média: 8.25`,
+    tip: '<strong>Arrays antecipados:</strong> usamos double[] apenas para a demo — arrays serão ensinados na Aula 05. Por hora, foque no comportamento do break e continue, não na sintaxe do array.'
+  },
+  {
+    title: 'for aninhado — tabuada formatada',
+    sub: '~12 min · Crie Tabuada.java',
+    badge: 'badge-nest',
+    badgeLabel: 'aninhado',
+    desc: 'Um for dentro de outro. O laço interno executa completamente para cada iteração do externo. Total de iterações = N_externo × N_interno.',
+    code: `<span class="kw">public class</span> <span class="cl">Tabuada</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {
+
+        <span class="cm">// Cabeçalho</span>
+        System.out.<span class="fn">print</span>(<span class="str">"    "</span>);
+        <span class="kw">for</span> (<span class="tp">int</span> <span class="vr">j</span> = <span class="num">1</span>; <span class="vr">j</span> &lt;= <span class="num">9</span>; <span class="vr">j</span>++)
+            System.out.<span class="fn">printf</span>(<span class="str">"%4d"</span>, <span class="vr">j</span>);
+        System.out.<span class="fn">println</span>(<span class="str">"\n    " + "────".repeat(9)</span>);
+
+        <span class="cm">// Corpo da tabuada</span>
+        <span class="kw">for</span> (<span class="tp">int</span> <span class="vr">i</span> = <span class="num">1</span>; <span class="vr">i</span> &lt;= <span class="num">9</span>; <span class="vr">i</span>++) {
+            System.out.<span class="fn">printf</span>(<span class="str">"%2d |"</span>, <span class="vr">i</span>);
+            <span class="kw">for</span> (<span class="tp">int</span> <span class="vr">j</span> = <span class="num">1</span>; <span class="vr">j</span> &lt;= <span class="num">9</span>; <span class="vr">j</span>++) {
+                System.out.<span class="fn">printf</span>(<span class="str">"%4d"</span>, <span class="vr">i</span> * <span class="vr">j</span>);
+            }
+            System.out.<span class="fn">println</span>();
+        }
+    }
+}`,
+    output: `       1   2   3   4   5   6   7   8   9
+    ────────────────────────────────────
+ 1 |   1   2   3   4   5   6   7   8   9
+ 2 |   2   4   6   8  10  12  14  16  18
+ 3 |   3   6   9  12  15  18  21  24  27
+...
+ 9 |   9  18  27  36  45  54  63  72  81`,
+    tip: '<strong>Iterações totais:</strong> 9 × 9 = 81. Observe: o printf com %4d reserva sempre 4 caracteres para o número — isso é o que alinha as colunas perfeitamente. Experimente trocar para %5d e veja o que muda.'
+  }
+];
+
+let activeStep = 0;
+const doneSteps = new Set();
+
+function build() {
+  const el = document.getElementById('demos');
+  DEMOS.forEach((d, i) => {
+    const div = document.createElement('div');
+    div.className = 'demo-step' + (i === 0 ? ' active-step' : '');
+    div.id = 'ds-' + i;
+    div.innerHTML = `
+      <div class="ds-head" onclick="togStep(${i})">
+        <div class="ds-num">${i+1}</div>
+        <div class="ds-info">
+          <div class="ds-title">${d.title}</div>
+          <div class="ds-sub">${d.sub}</div>
+        </div>
+        <span class="ds-badge ${d.badge}">${d.badgeLabel}</span>
+      </div>
+      <div class="ds-body">
+        <div class="ds-bi">
+          <div class="step-desc">${d.desc}</div>
+          <div class="cb">
+            <div class="cb-head"><span class="cb-lang">JAVA — ${d.title.split('—')[0].trim()}.java</span><button class="cp-btn" onclick="cpStep(this)">Copiar</button></div>
+            <pre>${d.code}</pre>
+          </div>
+          <div class="terminal">
+            <div class="term-bar"><span class="td tr2"></span><span class="td ty"></span><span class="td tg"></span><span class="term-title">Saída esperada</span></div>
+            <div class="term-body"><div class="term-label">// Console output</div>${d.output}</div>
+          </div>
+          <div class="tip-box">${d.tip}</div>
+          <div class="ds-actions">
+            <button class="ds-btn btn-done" onclick="markDone(${i})">✓ Feito — próxima demo</button>
+          </div>
+        </div>
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+function togStep(i) {
+  const c = document.getElementById('ds-' + i);
+  const isActive = c.classList.contains('active-step');
+  document.querySelectorAll('.demo-step').forEach(x => x.classList.remove('active-step'));
+  if (!isActive) c.classList.add('active-step');
+}
+
+function markDone(i) {
+  doneSteps.add(i);
+  const c = document.getElementById('ds-' + i);
+  c.classList.remove('active-step');
+  c.classList.add('done-step');
+  c.querySelector('.ds-num').textContent = '✓';
+  const btn = c.querySelector('.btn-done');
+  btn.textContent = 'Concluído!';
+  btn.disabled = true;
+  btn.style.opacity = '.5';
+  if (i + 1 < DEMOS.length) {
+    const next = document.getElementById('ds-' + (i + 1));
+    next.classList.add('active-step');
+    setTimeout(() => next.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 150);
+  }
+}
+
+function cpStep(btn) {
+  const pre = btn.closest('.cb').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText);
+  btn.textContent = 'Copiado!';
+  setTimeout(() => btn.textContent = 'Copiar', 2000);
+}
+
+build();
+</script>
+</body>
+</html>
